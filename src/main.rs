@@ -40,6 +40,10 @@ fn main() {
 			warning = "[Number must be less than 7]";
 			continue 'outer;
 		}
+		if board[(collumn - 1) as usize][0] != Piece::None {
+			warning = "[This collumn is full!]";
+			continue 'outer;
+		}
 
 		for i in (0..board[(collumn - 1) as usize].len()).rev() {
 			// println!("{:?}", board[(collumn - 1) as usize][i]);1
