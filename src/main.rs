@@ -75,7 +75,7 @@ fn print_board(board: &[[Piece; 7]; 7], (x, y): (u8, u8) ) {
 			if x == (j as u8) && y == (i as u8) && (collumn[i] != Piece::None)   {
 				print!("{}{}{}", " ".on_yellow(), piece_to_string(collumn[i as usize]).on_yellow(), " ".on_yellow());
 			} else {
-				print!("{}{}{}", " ".white(), piece_to_string(collumn[i as usize]), " ".white());
+				print!("{}{}{}", " ", piece_to_string(collumn[i as usize]), " ");
 			}
 			j += 1;
 		}
