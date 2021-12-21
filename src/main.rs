@@ -3,13 +3,15 @@ use std::io;
 
 fn main() {
 	let mut board = [[Piece::None; 7]; 7];
-	board[0][5] = Piece::Red;
-	board[0][6] = Piece::Blue;
+	// board[0][5] = Piece::Red;
+	// board[0][6] = Piece::Blue;
+
 
 	// print_board(&board);
 
 	let mut red_turn = true;
-	loop {
+	let mut chosen = (0,0);
+	'outer: loop {
 		// print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 		print!("{esc}c", esc = 27 as char);
 
@@ -20,8 +22,8 @@ fn main() {
 		} else {
 			println!("It's {} turn!", "Blue's".bold().bright_blue());
 		}
-		println!("{}", "1 2 3 4 5 6 7".white().underline());
-		print_board(&board);
+		println!("{}", " 1  2  3  4  5  6  7".white().underline());
+		print_board(&board, chosen);
 
 		println!("{} ", "Select the collumn (1 to 7):");
 		let mut collumn = String::new();
@@ -33,12 +35,12 @@ fn main() {
 			Ok(num) => num,
 			Err(_) => {
 				println!("{}", "\nThat is not a valid collumn\n".bold().underline().bright_yellow());
-				continue;
+				continue 'outer;
 			}
 		};
 		if collumn > 7 {
 			println!("{}", "\nThat is not a valid collumn\n".bold().underline().bright_yellow());
-			continue;
+			continue 'outer;
 		}
 
 		for i in (0..board[(collumn - 1) as usize].len()).rev() {
@@ -51,6 +53,7 @@ fn main() {
 					} else {
 						Piece::Blue
 					};
+					chosen = ((collumn - 1) as u8, i as u8);
 					break;
 				},
 				_ => ()
@@ -61,17 +64,23 @@ fn main() {
 	}
 }
 
-fn print_board(board: &[[Piece; 7]; 7]) {
+fn print_board(board: &[[Piece; 7]; 7], (x, y): (u8, u8) ) {
 	for i in 0..board[0].len() {
+		let mut j = 0;
 		for collumn in board {
 			// print!("{} ", collumn[i]);
-			print!("{} ", piece_to_string(collumn[i]));
+			if x == (j as u8) && y == (i as u8) && (collumn[i] != Piece::None)   {
+				print!("{}{}{}", " ".on_yellow(), piece_to_string(collumn[i as usize]).on_yellow(), " ".on_yellow());
+			} else {
+				print!("{}{}{}", " ".white(), piece_to_string(collumn[i as usize]), " ".white());
+			}
+			j += 1;
 		}
 		print!("\n");
 	}
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 enum Piece {
 	None,
 	Red,
@@ -80,7 +89,7 @@ enum Piece {
 
 fn piece_to_string(piece: Piece) -> String {
 	match piece {
-		Piece::None => "|".white().to_string(),
+		Piece::None => "◦".white().dimmed().to_string(),
 		Piece::Red => "●".bright_red().to_string(),
 		Piece::Blue => "●".bright_blue().to_string(),
 	}
