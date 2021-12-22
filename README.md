@@ -3,6 +3,7 @@ Connect 4, written in Rust! Currently win checking is still unimplemented.
 ![ezgif-7-fea2d0dc8e](https://user-images.githubusercontent.com/61964090/147037750-e0706328-9b32-4101-ad5d-42b5a0732d41.gif)
 
 ### Download and play
+!! Untested on windows <br>
 It is written in [Rust](https://www.rust-lang.org/tools/install), so make sure it is installed.
 Afterwhich, simply run the following commands:
 ```bash
