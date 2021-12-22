@@ -1,5 +1,5 @@
 use colored::*;
-use std::io;
+use std::{thread, time, io};
 
 fn main() {
 	let mut board = [[Piece::None; 7]; 7];
@@ -10,8 +10,9 @@ fn main() {
 	// print_board(&board);
 
 	let mut red_turn = true;
-	let mut chosen = (0,0);
+	let mut chosen = (8,8);
 	let mut warning = "";
+	let mut ghost_board = board.clone();
 	'outer: loop {
 		// print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 		print!("{esc}c", esc = 27 as char);
@@ -39,15 +40,15 @@ fn main() {
 		if collumn > 7 {
 			warning = "[Number must be less than 7]";
 			continue 'outer;
-		}
+		};
 		if board[(collumn - 1) as usize][0] != Piece::None {
 			warning = "[This collumn is full!]";
 			continue 'outer;
-		}
+		};
 
+		ghost_board = board.clone();
 		for i in (0..board[(collumn - 1) as usize].len()).rev() {
 			// println!("{:?}", board[(collumn - 1) as usize][i]);1
-			
 			match board[(collumn - 1) as usize][i] {
 				Piece::None => {
 					board[(collumn - 1) as usize][i] = if red_turn {
@@ -57,10 +58,39 @@ fn main() {
 					};
 					chosen = ((collumn - 1) as u8, i as u8);
 					warning = "";
+					let wait = time::Duration::from_millis(20);
+					ghost_board[(collumn - 1) as usize][0 as usize] = if red_turn {
+						Piece::Red
+					} else {
+						Piece::Blue
+					};
+					'animation: loop {
+						print!("{esc}c", esc = 27 as char);
+						thread::sleep(wait);
+
+						'drop: for j in 0..board[(collumn - 1) as usize].len() {
+							if j == chosen.1 as usize {
+								break 'animation;
+							}
+							if ghost_board[(collumn - 1) as usize][j as usize] != Piece::None {
+								ghost_board[(collumn - 1) as usize][j as usize] = Piece::None;
+								ghost_board[(collumn - 1) as usize][(j+1) as usize] = if red_turn {
+									Piece::Red
+								} else {
+									Piece::Blue
+								};
+								break 'drop;
+							};
+						};
+
+						println!("\n>>\n\n {}", "1  2  3  4  5  6  7".white().underline());
+						print_board(&ghost_board, chosen);
+						// break 'animation;
+					};
 					break;
 				},
 				_ => ()
-			}
+			};
 		};
 
 		red_turn = !red_turn;
@@ -72,7 +102,7 @@ fn print_board(board: &[[Piece; 7]; 7], (x, y): (u8, u8) ) {
 		let mut j = 0;
 		for collumn in board {
 			// print!("{} ", collumn[i]);
-			if x == (j as u8) && y == (i as u8) && (collumn[i] != Piece::None)   {
+			if x == (j as u8) && y == (i as u8) {//&& (collumn[i] != Piece::None || y != 0)   {
 				print!("{0}{1}{0}", " ".on_yellow(), piece_to_string(collumn[i as usize]).on_yellow());
 			} else {
 				print!("{0}{1}{0}", " ", piece_to_string(collumn[i as usize]));
