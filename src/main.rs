@@ -2,7 +2,7 @@ use colored::*;
 use std::{thread, time, io};
 
 fn main() {
-	let mut board = [[Piece::None; 7]; 7];
+	let mut board = [[Piece::None; 6]; 7];
 	// board[0][5] = Piece::Red;
 	// board[0][6] = Piece::Blue;
 
@@ -97,7 +97,7 @@ fn main() {
 	}
 }
 
-fn print_board(board: &[[Piece; 7]; 7], (x, y): (u8, u8) ) {
+fn print_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8) ) {
 	for i in 0..board[0].len() {
 		let mut j = 0;
 		for collumn in board {
@@ -126,4 +126,8 @@ fn piece_to_string(piece: Piece) -> String {
 		Piece::Red => "●".bright_red().to_string(),
 		Piece::Blue => "●".bright_blue().to_string(),
 	}
+}
+
+fn check_board(board: &[[Piece; 6]; 7]) {
+	
 }
