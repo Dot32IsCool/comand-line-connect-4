@@ -16,3 +16,5 @@ cargo run --release
 ```
 
 Alternatively you can download the project source code as a .zip, extract the files, `cd` into the extracted folder and execute `cargo run --release` from there.
+
+When you wish to exit the game, press ctrl+c. Starting the game again is as simple as running `cargo run --release` again 👍
