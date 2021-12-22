@@ -4,7 +4,7 @@ Connect 4, written in Rust! Currently win checking is still unimplemented.
 
 ### Download and play
 It is written in [Rust](https://www.rust-lang.org/tools/install), so make sure it is installed.
-Once installed, simply run the following commands:
+Afterwhich, simply run the following commands:
 ```bash
 git clone https://github.com/Dot32IsCool/comand-line-connect-4.git
 ```
