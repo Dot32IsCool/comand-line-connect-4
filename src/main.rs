@@ -24,42 +24,42 @@ fn main() {
 		print_board(&board, chosen);
 		println!("{}", warning.red());
 
-		println!("{} ", "Select the collumn (1 to 7):");
-		let mut collumn = String::new();
+		println!("{} ", "Select the column (1 to 7):");
+		let mut column = String::new();
 		io::stdin()
-			.read_line(&mut collumn)
+			.read_line(&mut column)
 			.expect("Failed to read line");
 
-		let collumn: u32 = match collumn.trim().parse() {
+		let column: u32 = match column.trim().parse() {
 			Ok(num) => num,
 			Err(_) => {
 				warning = "[Please enter a number]";
 				continue 'outer;
 			}
 		};
-		if collumn > 7 {
+		if column > 7 {
 			warning = "[Number must be less than 7]";
 			continue 'outer;
 		};
-		if board[(collumn - 1) as usize][0] != Piece::None {
-			warning = "[This collumn is full!]";
+		if board[(column - 1) as usize][0] != Piece::None {
+			warning = "[This column is full!]";
 			continue 'outer;
 		};
 
 		ghost_board = board.clone();
-		for i in (0..board[(collumn - 1) as usize].len()).rev() {
-			// println!("{:?}", board[(collumn - 1) as usize][i]);1
-			match board[(collumn - 1) as usize][i] {
+		for i in (0..board[(column - 1) as usize].len()).rev() {
+			// println!("{:?}", board[(column - 1) as usize][i]);1
+			match board[(column - 1) as usize][i] {
 				Piece::None => {
-					board[(collumn - 1) as usize][i] = if red_turn {
+					board[(column - 1) as usize][i] = if red_turn {
 						Piece::Red
 					} else {
 						Piece::Blue
 					};
-					chosen = ((collumn - 1) as u8, i as u8);
+					chosen = ((column - 1) as u8, i as u8);
 					warning = "";
 					let wait = time::Duration::from_millis(20);
-					ghost_board[(collumn - 1) as usize][0 as usize] = if red_turn {
+					ghost_board[(column - 1) as usize][0 as usize] = if red_turn {
 						Piece::Red
 					} else {
 						Piece::Blue
@@ -68,13 +68,13 @@ fn main() {
 						print!("{esc}c", esc = 27 as char);
 						thread::sleep(wait);
 
-						'drop: for j in 0..board[(collumn - 1) as usize].len() {
+						'drop: for j in 0..board[(column - 1) as usize].len() {
 							if j == chosen.1 as usize {
 								break 'animation;
 							}
-							if ghost_board[(collumn - 1) as usize][j as usize] != Piece::None {
-								ghost_board[(collumn - 1) as usize][j as usize] = Piece::None;
-								ghost_board[(collumn - 1) as usize][(j+1) as usize] = if red_turn {
+							if ghost_board[(column - 1) as usize][j as usize] != Piece::None {
+								ghost_board[(column - 1) as usize][j as usize] = Piece::None;
+								ghost_board[(column - 1) as usize][(j+1) as usize] = if red_turn {
 									Piece::Red
 								} else {
 									Piece::Blue
@@ -100,12 +100,12 @@ fn main() {
 fn print_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8) ) {
 	for i in 0..board[0].len() {
 		let mut j = 0;
-		for collumn in board {
-			// print!("{} ", collumn[i]);
-			if x == (j as u8) && y == (i as u8) {//&& (collumn[i] != Piece::None || y != 0)   {
-				print!("{0}{1}{0}", " ".on_yellow(), piece_to_string(collumn[i as usize]).on_yellow());
+		for column in board {
+			// print!("{} ", column[i]);
+			if x == (j as u8) && y == (i as u8) {//&& (column[i] != Piece::None || y != 0)   {
+				print!("{0}{1}{0}", " ".on_yellow(), piece_to_string(column[i as usize]).on_yellow());
 			} else {
-				print!("{0}{1}{0}", " ", piece_to_string(collumn[i as usize]));
+				print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
 			}
 			j += 1;
 		}
@@ -129,5 +129,5 @@ fn piece_to_string(piece: Piece) -> String {
 }
 
 fn check_board(board: &[[Piece; 6]; 7]) {
-	
+
 }
