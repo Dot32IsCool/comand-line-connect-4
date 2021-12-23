@@ -2,20 +2,17 @@ use colored::*;
 use std::{thread, time, io};
 
 fn main() {
+	let debug = false;
+
 	let mut board = [[Piece::None; 6]; 7];
-	// board[0][5] = Piece::Red;
-	// board[0][6] = Piece::Blue;
-
-
-	// print_board(&board);
-
 	let mut red_turn = true;
 	let mut chosen = (8,8);
 	let mut warning = "";
-	let mut ghost_board = board.clone();
+	let mut ghost_board: [[Piece; 6]; 7];
 	'outer: loop {
-		// print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-		print!("{esc}c", esc = 27 as char);
+		if !debug {
+			print!("{esc}c", esc = 27 as char);
+		};
 
 		println!("");
 
@@ -48,7 +45,6 @@ fn main() {
 
 		ghost_board = board.clone();
 		for i in (0..board[(column - 1) as usize].len()).rev() {
-			// println!("{:?}", board[(column - 1) as usize][i]);1
 			match board[(column - 1) as usize][i] {
 				Piece::None => {
 					board[(column - 1) as usize][i] = if red_turn {
@@ -65,7 +61,9 @@ fn main() {
 						Piece::Blue
 					};
 					'animation: loop {
-						print!("{esc}c", esc = 27 as char);
+						if !debug {
+							print!("{esc}c", esc = 27 as char);
+						};
 						thread::sleep(wait);
 
 						'drop: for j in 0..board[(column - 1) as usize].len() {
@@ -92,6 +90,7 @@ fn main() {
 				_ => ()
 			};
 		};
+		let _ = check_board(&board, chosen);
 
 		red_turn = !red_turn;
 	}
@@ -128,6 +127,123 @@ fn piece_to_string(piece: Piece) -> String {
 	}
 }
 
-fn check_board(board: &[[Piece; 6]; 7]) {
+fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
+	let mut pieces: Vec<(u8, u8)> = Vec::new();
+	let team = board[x as usize][y as usize];
+	let mut iter: i8 = 0;
 
+	let mut horizontal: u8 = 0;
+	let mut horizontal_pieces: Vec<(u8, u8)> = Vec::new();
+	loop {
+		if x as i8 + iter > board.len() as i8 - 1 {
+			horizontal += iter as u8;
+			horizontal_pieces.push((x, y));
+			break;
+		}
+		if board[(x as i8 + iter) as usize][y as usize] != team {
+			horizontal += iter as u8;
+			horizontal_pieces.push((x, y));
+			break;
+		}
+		iter += 1;
+	}
+	iter = 0;
+	loop {
+		if x as i8 + iter < 0 {
+			horizontal += iter.abs() as u8;
+			break;
+		}
+		if board[(x as i8 + iter) as usize][y as usize] != team {
+			horizontal += iter.abs() as u8;
+			break;
+		}
+		iter -= 1;
+	}
+	iter = 0;
+	println!("{}", horizontal);
+
+	let mut vertical: u8 = 1;
+	let mut vertical_pieces: Vec<(u8, u8)> = Vec::new();
+	loop {
+		if y as i8 + iter > board[x as usize].len() as i8 - 1 {
+			vertical += iter as u8;
+			vertical_pieces.push((x, y));
+			break;
+		}
+		if board[x as usize][(y as i8 + iter) as usize] != team {
+			vertical += iter as u8;
+			vertical_pieces.push((x, y));
+			break;
+		}
+		iter += 1;
+	}
+	iter = 0;
+	println!("{}", vertical);
+
+	let mut diagonal_down: u8 = 0;
+	let mut diagonal_down_pieces: Vec<(u8, u8)> = Vec::new();
+	loop {
+		if x as i8 + iter > board.len() as i8 - 1 || y as i8 + iter > board[x as usize].len() as i8 - 1 {
+			diagonal_down += iter as u8;
+			diagonal_down_pieces.push((x, y));
+			break;
+		}
+		if board[(x as i8 + iter) as usize][(y as i8 + iter) as usize] != team {
+			diagonal_down += iter as u8;
+			diagonal_down_pieces.push((x, y));
+			break;
+		}
+		iter += 1;
+	}
+	iter = 0;
+	loop {
+		if x as i8 + iter < 0 || y as i8 + iter < 0 {
+			diagonal_down += iter.abs() as u8;
+			diagonal_down_pieces.push((x, y));
+			break;
+		}
+		if board[(x as i8 + iter) as usize][(y as i8 + iter) as usize] != team {
+			diagonal_down += iter.abs() as u8;
+			diagonal_down_pieces.push((x, y));
+			break;
+		}
+		iter -= 1;
+	}
+	iter = 0;
+	println!("{}", diagonal_down);
+
+	let mut diagonal_up: u8 = 0;
+	let mut diagonal_up_pieces: Vec<(u8, u8)> = Vec::new();
+	loop {
+		if x as i8 + iter > board.len() as i8 - 1 || y as i8 - iter < 0 {
+			diagonal_up += iter as u8;
+			diagonal_up_pieces.push((x, y));
+			break;
+		}
+		if board[(x as i8 + iter) as usize][(y as i8 - iter) as usize] != team {
+			diagonal_up += iter as u8;
+			diagonal_up_pieces.push((x, y));
+			break;
+		}
+		iter += 1;
+	}
+	iter = 0;
+	loop {
+		if x as i8 + iter < 0 || y as i8 - iter > board[x as usize].len() as i8 - 1 {
+			diagonal_up += iter.abs() as u8;
+			diagonal_up_pieces.push((x, y));
+			break;
+		}
+		if board[(x as i8 + iter) as usize][(y as i8 - iter) as usize] != team {
+			diagonal_up += iter.abs() as u8;
+			diagonal_up_pieces.push((x, y));
+			break;
+		}
+		iter -= 1;
+	}
+	iter = 0;
+	println!("{}", diagonal_up);
+
+
+	return pieces;
 }
