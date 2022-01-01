@@ -90,7 +90,20 @@ fn main() {
 				_ => ()
 			};
 		};
-		let _ = check_board(&board, chosen);
+		let winning = check_board(&board, chosen);
+		println!("{:?}", winning);
+		if winning.len() > 0 {
+			if !debug {
+				print!("{esc}c", esc = 27 as char);
+			};
+			println!("");
+			println!(">> {} won the game!", if red_turn {"Red".bright_red()} else {"Blue".bright_blue()}.bold());
+			println!("\n {}", "1  2  3  4  5  6  7".white().underline());
+			print_winning_board(&ghost_board, winning);
+			println!("");
+
+			break 'outer;
+		}
 
 		red_turn = !red_turn;
 	}
@@ -106,6 +119,17 @@ fn print_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8) ) {
 			} else {
 				print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
 			}
+			j += 1;
+		}
+		print!("\n");
+	}
+}
+
+fn print_winning_board(board: &[[Piece; 6]; 7], pieces: Vec<(u8, u8)>) {
+	for i in 0..board[0].len() {
+		let mut j = 0;
+		for column in board {
+			print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
 			j += 1;
 		}
 		print!("\n");
@@ -137,14 +161,13 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	loop {
 		if x as i8 + iter > board.len() as i8 - 1 {
 			horizontal += iter as u8;
-			horizontal_pieces.push((x, y));
 			break;
 		}
 		if board[(x as i8 + iter) as usize][y as usize] != team {
 			horizontal += iter as u8;
-			horizontal_pieces.push((x, y));
 			break;
 		}
+		horizontal_pieces.push((x + iter as u8, y));
 		iter += 1;
 	}
 	iter = 0;
@@ -157,6 +180,7 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 			horizontal += iter.abs() as u8;
 			break;
 		}
+		horizontal_pieces.push((x - iter.abs() as u8, y));
 		iter -= 1;
 	}
 	iter = 0;
@@ -167,14 +191,13 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	loop {
 		if y as i8 + iter > board[x as usize].len() as i8 - 1 {
 			vertical += iter as u8;
-			vertical_pieces.push((x, y));
 			break;
 		}
 		if board[x as usize][(y as i8 + iter) as usize] != team {
 			vertical += iter as u8;
-			vertical_pieces.push((x, y));
 			break;
 		}
+		vertical_pieces.push((x, y + iter as u8));
 		iter += 1;
 	}
 	iter = 0;
@@ -185,28 +208,26 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	loop {
 		if x as i8 + iter > board.len() as i8 - 1 || y as i8 + iter > board[x as usize].len() as i8 - 1 {
 			diagonal_down += iter as u8;
-			diagonal_down_pieces.push((x, y));
 			break;
 		}
 		if board[(x as i8 + iter) as usize][(y as i8 + iter) as usize] != team {
 			diagonal_down += iter as u8;
-			diagonal_down_pieces.push((x, y));
 			break;
 		}
+		diagonal_down_pieces.push((x + iter as u8, y + iter as u8));
 		iter += 1;
 	}
 	iter = 0;
 	loop {
 		if x as i8 + iter < 0 || y as i8 + iter < 0 {
 			diagonal_down += iter.abs() as u8;
-			diagonal_down_pieces.push((x, y));
 			break;
 		}
 		if board[(x as i8 + iter) as usize][(y as i8 + iter) as usize] != team {
 			diagonal_down += iter.abs() as u8;
-			diagonal_down_pieces.push((x, y));
 			break;
 		}
+		diagonal_down_pieces.push((x - iter.abs() as u8, y - iter.abs() as u8));
 		iter -= 1;
 	}
 	iter = 0;
@@ -217,12 +238,10 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	loop {
 		if x as i8 + iter > board.len() as i8 - 1 || y as i8 - iter < 0 {
 			diagonal_up += iter as u8;
-			diagonal_up_pieces.push((x, y));
 			break;
 		}
 		if board[(x as i8 + iter) as usize][(y as i8 - iter) as usize] != team {
 			diagonal_up += iter as u8;
-			diagonal_up_pieces.push((x, y));
 			break;
 		}
 		iter += 1;
@@ -231,18 +250,28 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	loop {
 		if x as i8 + iter < 0 || y as i8 - iter > board[x as usize].len() as i8 - 1 {
 			diagonal_up += iter.abs() as u8;
-			diagonal_up_pieces.push((x, y));
 			break;
 		}
 		if board[(x as i8 + iter) as usize][(y as i8 - iter) as usize] != team {
 			diagonal_up += iter.abs() as u8;
-			diagonal_up_pieces.push((x, y));
 			break;
 		}
 		iter -= 1;
 	}
-	iter = 0;
 	println!("{}", diagonal_up);
+
+	if horizontal > 4 {	
+		pieces.append(&mut horizontal_pieces);
+	}
+	if vertical > 4 {	
+		pieces.append(&mut vertical_pieces);
+	}
+	if diagonal_down > 4 {	
+		pieces.append(&mut diagonal_down_pieces);
+	}
+	if diagonal_up > 4 {	
+		pieces.append(&mut diagonal_up_pieces);
+	}
 
 
 	return pieces;
