@@ -1,5 +1,5 @@
 # Connect 4 [command line interface game]
-Connect 4, written in Rust! Currently win checking is still unimplemented.
+Connect 4, written in Rust!
 ![ezgif-7-fea2d0dc8e](https://user-images.githubusercontent.com/61964090/147037750-e0706328-9b32-4101-ad5d-42b5a0732d41.gif)
 
 ### Download and play
