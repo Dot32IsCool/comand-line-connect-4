@@ -99,7 +99,7 @@ fn main() {
 			println!("");
 			println!(">> {} won the game!", if red_turn {"Red".bright_red()} else {"Blue".bright_blue()}.bold());
 			println!("\n {}", "1  2  3  4  5  6  7".white().underline());
-			print_winning_board(&ghost_board, winning);
+			print_winning_board(&ghost_board, &winning);
 			println!("");
 
 			break 'outer;
@@ -125,11 +125,21 @@ fn print_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8) ) {
 	}
 }
 
-fn print_winning_board(board: &[[Piece; 6]; 7], pieces: Vec<(u8, u8)>) {
+fn print_winning_board(board: &[[Piece; 6]; 7], pieces: &Vec<(u8, u8)>) {
 	for i in 0..board[0].len() {
 		let mut j = 0;
 		for column in board {
-			print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
+			let mut highlighted = false;
+			for (x, y) in pieces {
+				if x == &(j as u8) && y == &(i as u8) {
+					highlighted = true;
+				}
+			}
+			if highlighted {//&& (column[i] != Piece::None || y != 0)   {
+				print!("{0}{1}{0}", " ".on_yellow(), piece_to_string(column[i as usize]).on_yellow());
+			} else {
+				print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
+			}
 			j += 1;
 		}
 		print!("\n");
