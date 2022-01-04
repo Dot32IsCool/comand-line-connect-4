@@ -254,6 +254,7 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 			diagonal_up += iter as u8;
 			break;
 		}
+		diagonal_up_pieces.push((x + iter as u8, y - iter.abs() as u8));
 		iter += 1;
 	}
 	iter = 0;
@@ -266,6 +267,7 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 			diagonal_up += iter.abs() as u8;
 			break;
 		}
+		diagonal_up_pieces.push((x - iter.abs() as u8, y + iter.abs() as u8));
 		iter -= 1;
 	}
 	println!("{}", diagonal_up);
