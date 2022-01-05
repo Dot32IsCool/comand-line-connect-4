@@ -9,6 +9,7 @@ fn main() {
 	let mut chosen = (8,8);
 	let mut warning = "";
 	let mut ghost_board: [[Piece; 6]; 7];
+	let mut pieces = 0;
 	'outer: loop {
 		if !debug {
 			print!("{esc}c", esc = 27 as char);
@@ -53,6 +54,7 @@ fn main() {
 						Piece::Blue
 					};
 					chosen = ((column - 1) as u8, i as u8);
+					pieces += 1;
 					warning = "";
 					let wait = time::Duration::from_millis(20);
 					ghost_board[(column - 1) as usize][0 as usize] = if red_turn {
@@ -98,6 +100,19 @@ fn main() {
 			};
 			println!("");
 			println!(">> {} won the game!", if red_turn {"Red".bright_red()} else {"Blue".bright_blue()}.bold());
+			println!("\n {}", "1  2  3  4  5  6  7".white().underline());
+			print_winning_board(&ghost_board, &winning);
+			println!("");
+
+			break 'outer;
+		}
+
+		if pieces == 42 {
+			if !debug {
+				print!("{esc}c", esc = 27 as char);
+			};
+			println!("");
+			println!(">> [NOBODY] won the game!");
 			println!("\n {}", "1  2  3  4  5  6  7".white().underline());
 			print_winning_board(&ghost_board, &winning);
 			println!("");
