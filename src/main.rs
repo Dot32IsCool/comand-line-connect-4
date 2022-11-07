@@ -15,14 +15,14 @@ fn main() {
 			print!("{esc}c", esc = 27 as char);
 		};
 
-		println!("");
+		println!();
 
 		println!(">> It's {} turn!", if red_turn {"Red's".bright_red()} else {"Blue's".bright_blue()}.bold());
 		println!("\n {}", "1  2  3  4  5  6  7".white().underline());
 		print_board(&board, chosen);
 		println!("{}", warning.red());
 
-		println!("{} ", "Select the column (1 to 7):");
+		println!("Select the column (1 to 7):");
 		let mut column = String::new();
 		io::stdin()
 			.read_line(&mut column)
@@ -44,65 +44,62 @@ fn main() {
 			continue 'outer;
 		};
 
-		ghost_board = board.clone();
+		ghost_board = board;
 		for i in (0..board[(column - 1) as usize].len()).rev() {
-			match board[(column - 1) as usize][i] {
-				Piece::None => {
-					board[(column - 1) as usize][i] = if red_turn {
-						Piece::Red
-					} else {
-						Piece::Blue
+			if board[(column - 1) as usize][i] == Piece::None {
+				board[(column - 1) as usize][i] = if red_turn {
+					Piece::Red
+				} else {
+					Piece::Blue
+				};
+				chosen = ((column - 1) as u8, i as u8);
+				pieces += 1;
+				warning = "";
+				let wait = time::Duration::from_millis(20);
+				ghost_board[(column - 1) as usize][0_usize] = if red_turn {
+					Piece::Red
+				} else {
+					Piece::Blue
+				};
+				'animation: loop {
+					if !debug {
+						print!("{esc}c", esc = 27 as char);
 					};
-					chosen = ((column - 1) as u8, i as u8);
-					pieces += 1;
-					warning = "";
-					let wait = time::Duration::from_millis(20);
-					ghost_board[(column - 1) as usize][0 as usize] = if red_turn {
-						Piece::Red
-					} else {
-						Piece::Blue
-					};
-					'animation: loop {
-						if !debug {
-							print!("{esc}c", esc = 27 as char);
-						};
-						thread::sleep(wait);
+					thread::sleep(wait);
 
-						'drop: for j in 0..board[(column - 1) as usize].len() {
-							if j == chosen.1 as usize {
-								break 'animation;
-							}
-							if ghost_board[(column - 1) as usize][j as usize] != Piece::None {
-								ghost_board[(column - 1) as usize][j as usize] = Piece::None;
-								ghost_board[(column - 1) as usize][(j+1) as usize] = if red_turn {
-									Piece::Red
-								} else {
-									Piece::Blue
-								};
-								break 'drop;
+					'drop: for j in 0..board[(column - 1) as usize].len() {
+						if j == chosen.1 as usize {
+							break 'animation;
+						}
+						if ghost_board[(column - 1) as usize][j as usize] != Piece::None {
+							ghost_board[(column - 1) as usize][j as usize] = Piece::None;
+							ghost_board[(column - 1) as usize][(j+1) as usize] = if red_turn {
+								Piece::Red
+							} else {
+								Piece::Blue
 							};
+							break 'drop;
 						};
-
-						println!("\n>>\n\n {}", "1  2  3  4  5  6  7".white().underline());
-						print_board(&ghost_board, chosen);
-						// break 'animation;
 					};
-					break;
-				},
-				_ => ()
+
+					println!("\n>>\n\n {}", "1  2  3  4  5  6  7".white().underline());
+					print_board(&ghost_board, chosen);
+					// break 'animation;
+				};
+				break;
 			};
 		};
 		let winning = check_board(&board, chosen);
 		println!("{:?}", winning);
-		if winning.len() > 0 {
+		if !winning.is_empty() {
 			if !debug {
 				print!("{esc}c", esc = 27 as char);
 			};
-			println!("");
+			println!();
 			println!(">> {} won the game!", if red_turn {"Red".bright_red()} else {"Blue".bright_blue()}.bold());
 			println!("\n {}", "1  2  3  4  5  6  7".white().underline());
 			print_winning_board(&ghost_board, &winning);
-			println!("");
+			println!();
 
 			break 'outer;
 		}
@@ -111,11 +108,11 @@ fn main() {
 			if !debug {
 				print!("{esc}c", esc = 27 as char);
 			};
-			println!("");
+			println!();
 			println!(">> [NOBODY] won the game!");
 			println!("\n {}", "1  2  3  4  5  6  7".white().underline());
 			print_winning_board(&ghost_board, &winning);
-			println!("");
+			println!();
 
 			break 'outer;
 		}
@@ -126,24 +123,21 @@ fn main() {
 
 fn print_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8) ) {
 	for i in 0..board[0].len() {
-		let mut j = 0;
-		for column in board {
+		for (j, column) in board.iter().enumerate() {
 			// print!("{} ", column[i]);
 			if x == (j as u8) && y == (i as u8) {//&& (column[i] != Piece::None || y != 0)   {
 				print!("{0}{1}{0}", " ".on_yellow(), piece_to_string(column[i as usize]).on_yellow());
 			} else {
-				print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
+				print!(" {} ", piece_to_string(column[i as usize]));
 			}
-			j += 1;
 		}
-		print!("\n");
+		println!();
 	}
 }
 
 fn print_winning_board(board: &[[Piece; 6]; 7], pieces: &Vec<(u8, u8)>) {
 	for i in 0..board[0].len() {
-		let mut j = 0;
-		for column in board {
+		for (j, column) in board.iter().enumerate() {
 			let mut highlighted = false;
 			for (x, y) in pieces {
 				if x == &(j as u8) && y == &(i as u8) {
@@ -153,11 +147,10 @@ fn print_winning_board(board: &[[Piece; 6]; 7], pieces: &Vec<(u8, u8)>) {
 			if highlighted {//&& (column[i] != Piece::None || y != 0)   {
 				print!("{0}{1}{0}", " ".on_yellow(), piece_to_string(column[i as usize]).on_yellow());
 			} else {
-				print!("{0}{1}{0}", " ", piece_to_string(column[i as usize]));
+				print!(" {} ", piece_to_string(column[i as usize]));
 			}
-			j += 1;
 		}
-		print!("\n");
+		println!();
 	}
 }
 
@@ -198,14 +191,14 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	iter = 0;
 	loop {
 		if x as i8 + iter < 0 {
-			horizontal += iter.abs() as u8;
+			horizontal += iter.unsigned_abs();
 			break;
 		}
 		if board[(x as i8 + iter) as usize][y as usize] != team {
-			horizontal += iter.abs() as u8;
+			horizontal += iter.unsigned_abs();
 			break;
 		}
-		horizontal_pieces.push((x - iter.abs() as u8, y));
+		horizontal_pieces.push((x - iter.unsigned_abs(), y));
 		iter -= 1;
 	}
 	iter = 0;
@@ -245,14 +238,14 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	iter = 0;
 	loop {
 		if x as i8 + iter < 0 || y as i8 + iter < 0 {
-			diagonal_down += iter.abs() as u8;
+			diagonal_down += iter.unsigned_abs();
 			break;
 		}
 		if board[(x as i8 + iter) as usize][(y as i8 + iter) as usize] != team {
-			diagonal_down += iter.abs() as u8;
+			diagonal_down += iter.unsigned_abs();
 			break;
 		}
-		diagonal_down_pieces.push((x - iter.abs() as u8, y - iter.abs() as u8));
+		diagonal_down_pieces.push((x - iter.unsigned_abs(), y - iter.unsigned_abs()));
 		iter -= 1;
 	}
 	iter = 0;
@@ -269,20 +262,20 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 			diagonal_up += iter as u8;
 			break;
 		}
-		diagonal_up_pieces.push((x + iter as u8, y - iter.abs() as u8));
+		diagonal_up_pieces.push((x + iter as u8, y - iter.unsigned_abs()));
 		iter += 1;
 	}
 	iter = 0;
 	loop {
 		if x as i8 + iter < 0 || y as i8 - iter > board[x as usize].len() as i8 - 1 {
-			diagonal_up += iter.abs() as u8;
+			diagonal_up += iter.unsigned_abs();
 			break;
 		}
 		if board[(x as i8 + iter) as usize][(y as i8 - iter) as usize] != team {
-			diagonal_up += iter.abs() as u8;
+			diagonal_up += iter.unsigned_abs();
 			break;
 		}
-		diagonal_up_pieces.push((x - iter.abs() as u8, y + iter.abs() as u8));
+		diagonal_up_pieces.push((x - iter.unsigned_abs(), y + iter.unsigned_abs()));
 		iter -= 1;
 	}
 	println!("{}", diagonal_up);
@@ -301,5 +294,5 @@ fn check_board(board: &[[Piece; 6]; 7], (x, y): (u8, u8)) -> Vec<(u8, u8)> {
 	}
 
 
-	return pieces;
+	pieces
 }
